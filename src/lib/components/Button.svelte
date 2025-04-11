@@ -28,12 +28,12 @@
   };
 
   const base =
-    'inline-flex items-center justify-center font-medium rounded-md px-4 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none gap-2 text-base font-sans';
+    'inline-flex items-center justify-center font-medium rounded-md px-3 py-2 sm:px-4 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none gap-2 text-sm sm:text-base font-sans';
 </script>
 
 <button
   type={type}
-  class={`${base} ${VARIANT[variant]} ${className}`}
+  class={`${base} ${VARIANT[variant as ButtonVariant]} ${className}`}
   disabled={disabled || loading}
   aria-disabled={disabled || loading}
   aria-busy={loading}

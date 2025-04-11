@@ -1,6 +1,6 @@
-import type { ServerLoad } from '@sveltejs/kit';
-import { error } from '@sveltejs/kit';
-import { supabase } from '$lib/supabaseClient';
+import type { ServerLoad } from "@sveltejs/kit";
+import { error } from "@sveltejs/kit";
+import { supabase } from "$lib/supabaseClient";
 
 const GLOBAL_LEADERBOARD_LIMIT = 20;
 
@@ -16,37 +16,50 @@ export const load: ServerLoad = async (event) => {
   const session = await event.locals.getSession?.();
   const userId = session?.user?.id;
   if (!userId) {
-    throw error(401, 'Not authenticated');
+    throw error(401, "Not authenticated");
   }
 
   // --- Global Leaderboard ---
   const { data: globalData, error: globalError } = await supabase
-    .from('user_metrics')
-    .select('user_id, points, profiles(username, avatar_url)')
-    .order('points', { ascending: false })
+    .from("user_metrics")
+    .select("user_id, points, profiles(username, avatar_url)")
+    .order("points", { ascending: false })
     .limit(GLOBAL_LEADERBOARD_LIMIT);
 
   if (globalError) {
-    throw error(500, 'Failed to fetch global leaderboard');
+    throw error(500, "Failed to fetch global leaderboard");
   }
 
-  const globalLeaderboard: LeaderboardEntry[] = (globalData ?? []).map((row: any) => ({
-    user_id: row.user_id,
-    username: row.profiles?.username ?? '',
-    avatar_url: row.profiles?.avatar_url ?? null,
-    points: row.points ?? 0
-  }));
+  // Supabase returns rows as generic objects; cast to expected shape.
+  const globalLeaderboard: LeaderboardEntry[] = (globalData ?? []).map(
+    (row: Record<string, unknown>) => ({
+      user_id: String(row.user_id),
+      username:
+        typeof row.profiles === "object" &&
+        row.profiles &&
+        "username" in row.profiles
+          ? ((row.profiles as any).username ?? "")
+          : "",
+      avatar_url:
+        typeof row.profiles === "object" &&
+        row.profiles &&
+        "avatar_url" in row.profiles
+          ? ((row.profiles as any).avatar_url ?? null)
+          : null,
+      points: typeof row.points === "number" ? row.points : 0,
+    }),
+  );
 
   // --- Friends Leaderboard ---
   // 1. Get friend IDs (bidirectional, status = 'accepted')
   const { data: friendships, error: friendshipsError } = await supabase
-    .from('friendships')
-    .select('user_id, friend_id')
+    .from("friendships")
+    .select("user_id, friend_id")
     .or(`user_id.eq.${userId},friend_id.eq.${userId}`)
-    .eq('status', 'accepted');
+    .eq("status", "accepted");
 
   if (friendshipsError) {
-    throw error(500, 'Failed to fetch friendships');
+    throw error(500, "Failed to fetch friendships");
   }
 
   // Collect friend IDs (the other user in each friendship)
@@ -65,26 +78,39 @@ export const load: ServerLoad = async (event) => {
   let friendsLeaderboard: LeaderboardEntry[] = [];
   if (friendIds.size > 0) {
     const { data: friendsData, error: friendsError } = await supabase
-      .from('user_metrics')
-      .select('user_id, points, profiles(username, avatar_url)')
-      .in('user_id', Array.from(friendIds))
-      .order('points', { ascending: false });
+      .from("user_metrics")
+      .select("user_id, points, profiles(username, avatar_url)")
+      .in("user_id", Array.from(friendIds))
+      .order("points", { ascending: false });
 
     if (friendsError) {
-      throw error(500, 'Failed to fetch friends leaderboard');
+      throw error(500, "Failed to fetch friends leaderboard");
     }
 
-    friendsLeaderboard = (friendsData ?? []).map((row: any) => ({
-      user_id: row.user_id,
-      username: row.profiles?.username ?? '',
-      avatar_url: row.profiles?.avatar_url ?? null,
-      points: row.points ?? 0
-    }));
+    // Supabase returns rows as generic objects; cast to expected shape.
+    friendsLeaderboard = (friendsData ?? []).map(
+      (row: Record<string, unknown>) => ({
+        user_id: String(row.user_id),
+        username:
+          typeof row.profiles === "object" &&
+          row.profiles &&
+          "username" in row.profiles
+            ? ((row.profiles as any).username ?? "")
+            : "",
+        avatar_url:
+          typeof row.profiles === "object" &&
+          row.profiles &&
+          "avatar_url" in row.profiles
+            ? ((row.profiles as any).avatar_url ?? null)
+            : null,
+        points: typeof row.points === "number" ? row.points : 0,
+      }),
+    );
   }
 
   return {
     globalLeaderboard,
     friendsLeaderboard,
-    currentUserId: userId
+    currentUserId: userId,
   };
 };

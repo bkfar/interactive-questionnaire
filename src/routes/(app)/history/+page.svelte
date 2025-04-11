@@ -2,7 +2,7 @@
   import Card from '$lib/components/Card.svelte';
   import Button from '$lib/components/Button.svelte';
   import Spinner from '$lib/components/Spinner.svelte';
-  import { page } from '$app/stores';
+  // No need for $app/stores; all data is passed via props.
   import { goto } from '$app/navigation';
 
   export let data: {

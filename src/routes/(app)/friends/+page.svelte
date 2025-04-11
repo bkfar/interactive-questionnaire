@@ -107,7 +107,7 @@
                   {#if isRequestable(user)}
                     <form method="POST" use:enhance={{
                       pending: () => { requestStatus[user.id] = ''; },
-                      result: (res, formEl) => {
+                      result: (res) => {
                         res.json().then((data) => {
                           if (data.success) {
                             requestStatus[user.id] = 'Success! Friend request sent.';
@@ -186,7 +186,7 @@
               <div class="ml-auto flex gap-2">
                 <form method="POST" action="?/acceptRequest" use:enhance={{
                   pending: () => { requestStatus[request.id] = ''; },
-                  result: (res, formEl) => {
+                  result: (res) => {
                     res.json().then((data) => {
                       if (data.success) {
                         requestStatus[request.id] = 'Success! Friend request accepted.';
@@ -205,7 +205,7 @@
                 </form>
                 <form method="POST" action="?/rejectRequest" use:enhance={{
                   pending: () => { requestStatus[request.id] = ''; },
-                  result: (res, formEl) => {
+                  result: (res) => {
                     res.json().then((data) => {
                       if (data.success) {
                         requestStatus[request.id] = 'Success! Friend request rejected.';

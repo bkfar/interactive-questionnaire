@@ -14,7 +14,7 @@
 
   // Form state
   let username: string = data.username ?? '';
-  let avatarFile: File | null = null;
+  // No need for avatarFile local state; file input is handled via form submission.
   let submitting = false;
   let errorMsg: string | null = null;
 
@@ -25,8 +25,7 @@
 
   // Handle file input change
   function handleFileChange(e: Event) {
-    const files = (e.target as HTMLInputElement).files;
-    avatarFile = files && files.length > 0 ? files[0] : null;
+    // No local state needed; file input is handled by the form submission.
   }
 
   // Demo: set submitting state on submit, reset after short delay (since no real action handler yet)

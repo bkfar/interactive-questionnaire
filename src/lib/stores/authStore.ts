@@ -1,5 +1,5 @@
-import { writable, type Writable } from 'svelte/store';
-import type { User } from '@supabase/supabase-js';
+import { writable, type Writable } from "svelte/store";
+import type { User } from "@supabase/supabase-js";
 
 export interface AuthState {
   loggedIn: boolean;
@@ -12,5 +12,5 @@ export interface AuthState {
  */
 export const authStore: Writable<AuthState> = writable({
   loggedIn: false,
-  user: null
+  user: null,
 });
