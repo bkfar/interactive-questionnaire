@@ -1,6 +1,8 @@
 <script lang="ts">
   import { authStore } from '$lib/stores/authStore';
   import { LayoutDashboard, History, Users, Trophy, FileText, User, Settings, LogOut, ChevronDown } from 'lucide-svelte';
+  import Button from '$lib/components/Button.svelte';
+  import { goto } from '$app/navigation';
   // No lifecycle hooks needed; all menu logic is handled via events.
   let menuOpen = $state(false);
   let menuButton: HTMLButtonElement | null = null;
@@ -39,6 +41,16 @@
       menuButton?.focus();
     }
   }
+  /**
+   * Placeholder logout handler.
+   * TODO: Connect to real logout logic (e.g., call /logout endpoint, clear auth store).
+   */
+  async function handleLogout() {
+    // Example: clear auth state here if needed
+    // await fetch('/logout', { method: 'POST' });
+    // $authStore.set({ user: null, ... });
+    goto('/');
+  }
 
   /**
    * Handles blur events on the menu container.
@@ -54,6 +66,9 @@
       }
     }, 0);
   }
+$effect(() => {
+  console.log('Header.svelte: $authStore.user =', $authStore.user);
+});
 </script>
 
 <nav class="bg-background border-b border-border px-2 sm:px-4 py-1 sm:py-2 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0">
@@ -132,10 +147,14 @@
               </a>
             </li>
             <li>
-              <button class="flex items-center gap-2 w-full text-left block px-4 py-2 text-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors" type="button" role="menuitem" tabindex="0">
+              <Button
+                class="flex items-center gap-2 w-full text-left px-4 py-2 text-foreground hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                type="button"
+                on:click={handleLogout}
+              >
                 <LogOut class="w-4 h-4 stroke-[1.5]" aria-hidden="true" />
                 <span>Logout</span>
-              </button>
+              </Button>
             </li>
           </ul>
         {/if}
