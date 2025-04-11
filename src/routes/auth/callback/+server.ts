@@ -1,6 +1,6 @@
 // src/routes/auth/callback/+server.ts
 import { redirect, type RequestHandler } from "@sveltejs/kit";
-import { createSupabaseServerClient } from "@supabase/auth-helpers-sveltekit";
+import { createServerClient } from "@supabase/ssr";
 
 /**
  * Handles the Supabase auth callback (email verification, OAuth, etc.).
@@ -8,14 +8,14 @@ import { createSupabaseServerClient } from "@supabase/auth-helpers-sveltekit";
  */
 export const GET: RequestHandler = async (event) => {
   // Create a Supabase client using the event (request context)
-  const supabase = createSupabaseServerClient({
-    supabaseUrl: process.env.PUBLIC_SUPABASE_URL,
-    supabaseKey: process.env.PUBLIC_SUPABASE_ANON_KEY,
-    event
-  });
+  const supabase = createServerClient(
+    process.env.PUBLIC_SUPABASE_URL!,
+    process.env.PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: event.cookies }
+  );
 
   // This will parse the callback and set the session cookies
-  await supabase.auth.getSessionFromUrl({ storeSession: true });
+  await supabase.auth.exchangeCodeForSession(event.url.toString());
 
   // Always redirect to /dashboard after processing
   throw redirect(303, "/dashboard");
